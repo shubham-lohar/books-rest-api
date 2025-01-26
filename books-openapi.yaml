@@ -1,0 +1,226 @@
+openapi: 3.0.1
+info:
+  title: Book Management API
+  description: REST API for managing books
+  version: 1.0.0
+  contact:
+    name: Shubham
+    email: email@example.com
+
+servers:
+  - url: http://localhost:8080
+    description: Local server
+
+tags:
+  - name: books
+    description: Book management operations
+
+paths:
+  /api/books:
+    get:
+      tags:
+        - books
+      summary: Get all books
+      description: Returns a paginated list of books
+      parameters:
+        - name: page
+          in: query
+          description: Page number (0-based)
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: size
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Book"
+                  totalElements:
+                    type: integer
+                    description: Total number of elements
+                  totalPages:
+                    type: integer
+                    description: Total number of pages
+                  number:
+                    type: integer
+                    description: Current page number
+                  size:
+                    type: integer
+                    description: Number of elements per page
+                  first:
+                    type: boolean
+                    description: Whether this is the first page
+                  last:
+                    type: boolean
+                    description: Whether this is the last page
+                  empty:
+                    type: boolean
+                    description: Whether the page is empty
+
+    post:
+      tags:
+        - books
+      summary: Create a new book
+      description: Creates a new book with the provided details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Book"
+      responses:
+        "200":
+          description: Book created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Book"
+        "400":
+          description: Invalid input
+
+  /search:
+    get:
+      tags:
+        - books
+      summary: Search for books
+      description: Returns a list of books matching the search term
+      parameters:
+        - name: searchTerm
+          in: query
+          description: The title or author to search for
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful search operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Book"
+        "404":
+          description: No books found matching the search term
+
+  /api/books/{id}:
+    get:
+      tags:
+        - books
+      summary: Get a book by ID
+      description: Returns a book based on ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Found the book
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Book"
+        "404":
+          description: Book not found
+
+    put:
+      tags:
+        - books
+      summary: Update a book
+      description: Updates a book with the provided details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Book"
+      responses:
+        "200":
+          description: Book updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Book"
+        "400":
+          description: Invalid input
+        "404":
+          description: Book not found
+
+    delete:
+      tags:
+        - books
+      summary: Delete a book
+      description: Deletes a book based on ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Book deleted successfully
+        "404":
+          description: Book not found
+
+components:
+  schemas:
+    Book:
+      type: object
+      required:
+        - title
+        - author
+        - publishedDate
+        - isbn
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        title:
+          type: string
+          example: "The Great Gatsby"
+        author:
+          type: string
+          example: "F. Scott Fitzgerald"
+        publishedDate:
+          type: string
+          format: date
+          example: "1925-04-10"
+        isbn:
+          type: string
+          example: "978-0743273565"
+        description:
+          type: string
+          example: "The story of the mysteriously wealthy Jay Gatsby"
+        price:
+          type: string
+          example: "9.99"
